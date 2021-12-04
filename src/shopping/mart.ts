@@ -48,3 +48,14 @@ export function WALLET(balance: number): Wallet {
     balance: balance
   }
 }
+
+export type ShoppingOrder = {
+  item:ItemType,
+  amount:number
+}
+export function SHOPPPING_ORDER(item:ItemType, amount:number):ShoppingOrder {
+  return {
+    item:item,
+    amount:amount
+  }
+}
