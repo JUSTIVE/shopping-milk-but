@@ -1,4 +1,4 @@
-import { compose, FAILURE, Result, SUCCESS } from '../result'
+import { compose, FAILURE, flatMap, Result, SUCCESS } from '../result'
 import { ShoppingErrors } from './errors/shoppingError'
 import { NoCartExists, NO_CART_EXISTS } from './errors/cartError'
 import { NO_ITEM_EXISTS, ProcessRequestFailed } from './errors/processError'
@@ -96,8 +96,8 @@ function processRequest(cartAndMart: CartAndMart): ProcessRequestResult {
 }
 
 export const shopping = (mart: Mart, wallet: Wallet): ShoppingResult =>
-  compose(
+  compose(...([
     getCart, 
     processRequest, 
-    currify(purchase, wallet)
-  )(mart)
+    currify(purchase, wallet)].map(x=>flatMap(x))))(mart)
+  
