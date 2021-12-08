@@ -11,7 +11,7 @@
     "typescript": "^4.5.2"
   },
   "scripts": {
-    "build": "yarn autoclean --force && yarn tsc -d --outDir ./dist",
+    "build": "rm -rf ./dist && yarn tsc -d --outDir ./dist",
     "start": "yarn build && node ./dist"
   },
   "packageManager": "yarn@3.1.1"
