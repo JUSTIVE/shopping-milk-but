@@ -1,22 +1,16 @@
 import { TypeApplier, ValueAlias } from './metaType'
 
-type ResultTypeApplier<V extends ResultType, X> = TypeApplier<
-  'resultType',
-  V,
-  X
->
+type ResultTypeApplier<V extends ResultType, X> = TypeApplier<'resultType', V, X>
 export function compose<A, B, C, D, T1>(...functions: any) {
-  return functions.reduce(
-    (a: (x: T1) => Result<A, B>, b: (y: A) => Result<C, D>) => (value: T1) => {
-      const prevEvalResult = a(value)
-      switch (prevEvalResult.resultType) {
-        case 'Success':
-          return b(prevEvalResult.value)
-        case 'Failure':
-          return prevEvalResult
-      }
+  return functions.reduce((a: (x: T1) => Result<A, B>, b: (y: A) => Result<C, D>) => (value: T1) => {
+    const prevEvalResult = a(value)
+    switch (prevEvalResult.resultType) {
+      case 'Success':
+        return b(prevEvalResult.value)
+      case 'Failure':
+        return prevEvalResult
     }
-  )
+  })
 }
 
 export function flatMap<A, B>(result: Result<A, B>) {

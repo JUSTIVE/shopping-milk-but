@@ -1,23 +1,10 @@
 import { compose, FAILURE, flatMap, Result, SUCCESS } from '../result'
-import { ShoppingErrors } from './errors/shoppingError'
+import { currify } from '../functions'
+import { Cart, CART, Items, ItemType, Mart, ShoppingOrder, SHOPPPING_ORDER, Wallet } from './mart'
 import { NoCartExists, NO_CART_EXISTS } from './errors/cartError'
 import { NO_ITEM_EXISTS, ProcessRequestFailed } from './errors/processError'
-import {
-  Cart,
-  CART,
-  Items,
-  ItemType,
-  Mart,
-  ShoppingOrder,
-  SHOPPPING_ORDER,
-  Wallet
-} from './mart'
-import { currify } from '../functions'
-import {
-  NOT_ENOUGH_BALANCE,
-  NO_WALLET_EXISTS,
-  PurchaseError
-} from './errors/purchaseError'
+import { ShoppingErrors } from './errors/shoppingError'
+import { NOT_ENOUGH_BALANCE, NO_WALLET_EXISTS, PurchaseError } from './errors/purchaseError'
 
 export type ShoppingResult = Result<Items, ShoppingErrors>
 type CartAndMart = { cart: Cart; mart: Mart }
@@ -31,45 +18,31 @@ type ProcessRequestResult = Result<Cart, ProcessRequestFailed<ItemType>>
 type PurchaseResult = Result<Items, PurchaseError>
 type CheckWalletResult = Result<Wallet, PurchaseError>
 
-function addItemToCart(
-  order: ShoppingOrder,
-  cartAndMart: CartAndMart
-): AddItemResult {
+function addItemToCart(order: ShoppingOrder, cartAndMart: CartAndMart): AddItemResult {
   if (order.amount == 0) return SUCCESS(cartAndMart)
   const pickedItem = cartAndMart.mart.inventory[order.item].pop()
   return pickedItem !== undefined
     ? addItemToCart(
         SHOPPPING_ORDER(order.item, order.amount - 1),
-        CART_AND_MART(
-          CART([...cartAndMart.cart.items, pickedItem]),
-          cartAndMart.mart
-        )
+        CART_AND_MART(CART([...cartAndMart.cart.items, pickedItem]), cartAndMart.mart)
       )
     : FAILURE(NO_ITEM_EXISTS(order.item))
 }
 
-function addItemToCartIfExists(
-  order: ShoppingOrder,
-  cartAndMart: CartAndMart
-): AddItemResult {
+function addItemToCartIfExists(order: ShoppingOrder, cartAndMart: CartAndMart): AddItemResult {
   if (order.amount == 0) return SUCCESS(cartAndMart)
   const pickedItem = cartAndMart.mart.inventory[order.item].pop()
   return pickedItem !== undefined
     ? addItemToCartIfExists(
         SHOPPPING_ORDER(order.item, order.amount - 1),
-        CART_AND_MART(
-          CART([...cartAndMart.cart.items, pickedItem]),
-          cartAndMart.mart
-        )
+        CART_AND_MART(CART([...cartAndMart.cart.items, pickedItem]), cartAndMart.mart)
       )
-    : addItemToCartIfExists(SHOPPPING_ORDER(order.item, order.amount -1), cartAndMart)
+    : addItemToCartIfExists(SHOPPPING_ORDER(order.item, order.amount - 1), cartAndMart)
 }
 
 function getCart(mart: Mart): GetCartResult {
   const pickCart = mart.carts.pop()
-  return pickCart
-    ? SUCCESS(CART_AND_MART(pickCart, mart))
-    : FAILURE(NO_CART_EXISTS)
+  return pickCart ? SUCCESS(CART_AND_MART(pickCart, mart)) : FAILURE(NO_CART_EXISTS)
 }
 
 function purchase(wallet: Wallet, cart: Cart): PurchaseResult {
@@ -78,9 +51,7 @@ function purchase(wallet: Wallet, cart: Cart): PurchaseResult {
     return wallet ? SUCCESS(wallet) : FAILURE(NO_WALLET_EXISTS)
   }
   function checkPrice(wallet: Wallet): PurchaseResult {
-    return totalPrice < wallet.balance
-      ? SUCCESS(cart.items)
-      : FAILURE(NOT_ENOUGH_BALANCE)
+    return totalPrice < wallet.balance ? SUCCESS(cart.items) : FAILURE(NOT_ENOUGH_BALANCE)
   }
   return compose(checkWallet, checkPrice)(wallet)
 }
@@ -96,8 +67,4 @@ function processRequest(cartAndMart: CartAndMart): ProcessRequestResult {
 }
 
 export const shopping = (mart: Mart, wallet: Wallet): ShoppingResult =>
-  compose(...([
-    getCart, 
-    processRequest, 
-    currify(purchase, wallet)].map(x=>flatMap(x))))(mart)
-  
+  compose(getCart, processRequest, currify(purchase, wallet))(mart)

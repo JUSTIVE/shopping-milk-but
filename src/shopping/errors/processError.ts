@@ -7,6 +7,4 @@ export function NO_ITEM_EXISTS(item: ItemType): NoItemExists<ItemType> {
 
 export type CartIsFull = 'Cart is full please unload item to continue'
 
-export type ProcessRequestFailed<IT extends ItemType> =
-  | NoItemExists<IT>
-  | CartIsFull
+export type ProcessRequestFailed<IT extends ItemType> = NoItemExists<IT> | CartIsFull
