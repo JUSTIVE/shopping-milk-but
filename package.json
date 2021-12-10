@@ -14,7 +14,8 @@
   },
   "scripts": {
     "build": "rm -rf ./dist && yarn tsc -d --outDir ./dist",
-    "start": "yarn build && node ./dist"
+    "start": "yarn build && node ./dist",
+    "exec": "node ./dist"
   },
   "packageManager": "yarn@3.1.1",
   "devDependencies": {
