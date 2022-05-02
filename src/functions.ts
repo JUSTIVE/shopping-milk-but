@@ -8,3 +8,8 @@ export function currify<F extends (...x: any) => any>(
       : currify(fn, ...joinedArguements)
   }
 }
+
+export type CurryFunctionReturnType<F extends (...x: any) => any> = (...nextArguments: Parameters<F>[]) => ReturnType<F>
+
+
+export function currifyTyped<>
